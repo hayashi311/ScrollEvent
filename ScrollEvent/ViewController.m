@@ -28,7 +28,7 @@ static const CGFloat taskHeight = 60;
     if (self) {
         _taskViews = [NSMutableArray array];
         self.alwaysBounceVertical = YES;
-        _indexOfSpace = 3;
+        _indexOfSpace = NSUIntegerMax;
     }
     return self;
 }
