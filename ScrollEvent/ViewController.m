@@ -14,7 +14,7 @@ static const CGFloat taskHeight = 60;
 
 @interface HRTaskListView : UIScrollView
 
-@property (nonatomic, readonly) NSArray *taskViews;
+//@property (nonatomic, readonly) NSArray *taskViews;
 
 @end
 
@@ -29,6 +29,8 @@ static const CGFloat taskHeight = 60;
         _taskViews = [NSMutableArray array];
         self.alwaysBounceVertical = YES;
         _indexOfSpace = NSUIntegerMax;
+        self.showsVerticalScrollIndicator = NO;
+        self.showsHorizontalScrollIndicator = NO;
     }
     return self;
 }
@@ -101,6 +103,7 @@ static const CGFloat taskHeight = 60;
 @property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, strong) NSArray *taskListViews;
 
+@property (nonatomic) CGPoint grabbingTouchStartPoint;
 @property (nonatomic) CGPoint grabbingTouchPoint;
 @property (nonatomic, strong) CADisplayLink *displayLink;
 @end
@@ -121,7 +124,6 @@ static const CGFloat taskHeight = 60;
 
     for (NSUInteger i = 0; i < _taskListViews.count; ++i) {
         HRTaskListView *taskListView = _taskListViews[i];
-//        taskListView.backgroundColor = [[UIColor alloc] initWithRed:0.3f * (i + 1) green:0.5f blue:0.5f alpha:1];
         taskListView.backgroundColor = [UIColor whiteColor];
         [self.scrollView addSubview:taskListView];
 
@@ -199,6 +201,7 @@ static const CGFloat taskHeight = 60;
     [taskListView removeTaskView:taskView];
     [taskListView setNeedsLayout];
     self.grabbingTouchPoint = [gesture locationInView:self.view];
+    self.grabbingTouchStartPoint = self.grabbingTouchPoint;
     taskView.center = [self.view convertPoint:taskView.center fromView:taskView.superview];
     [self.view addSubview:taskView];
     [UIView animateWithDuration:0.2
@@ -289,12 +292,12 @@ static const CGFloat taskHeight = 60;
         );
 
         CGPoint contentOffset = self.scrollView.contentOffset;
-        if (CGRectContainsPoint(left, self.grabbingTouchPoint)) {
+        if (CGRectContainsPoint(left, self.grabbingTouchPoint) && self.grabbingTouchPoint.x < self.grabbingTouchStartPoint.x) {
             contentOffset.x -= 8;
             if (contentOffset.x > 0) {
                 [self.scrollView setContentOffset:contentOffset animated:NO];
             }
-        } else if (CGRectContainsPoint(right, self.grabbingTouchPoint)) {
+        } else if (CGRectContainsPoint(right, self.grabbingTouchPoint) && self.grabbingTouchPoint.x > self.grabbingTouchStartPoint.x) {
             contentOffset.x += 8;
             if ((contentOffset.x + CGRectGetWidth(self.scrollView.frame)) <= self.scrollView.contentSize.width) {
                 [self.scrollView setContentOffset:contentOffset animated:NO];
